@@ -6,20 +6,25 @@
 // 5. Close the database connection
 $databaseConnection = mysqli_connect("localhost", "root", "MyNewPass", "largesocial");
 
+// Check if the database connection was successful
+if (mysqli_connect_error()) {
+    exit("Database connection failed!");
+}
+
 // Storing errors in an array
 $errors = [];
 session_start();
 
-//Required to be loged in
+//Required to be logged in
 if (!isset($_SESSION['userId'])) {
     header("Location: login.php");
     exit();
 } else {
     ?>
-    Welcome <?php echo($_SESSION['nickname']); ?>
+    Welcome <?php echo ($_SESSION['nickname']); ?>
     <a href="logout.php">Logout</a>
-    <?php 
-    $userId = $_SESSION['userId']; 
+    <?php
+    $userId = $_SESSION['userId'];
 }
 ?>
 
@@ -40,7 +45,7 @@ if (isset($_GET['postDeleteId'])) {
         header("Location: index.php");
         exit();
     } else {
-        echo(mysqli_error($databaseConnection));
+        echo (mysqli_error($databaseConnection));
         mysqli_close($databaseConnection);
         exit();
     }
@@ -64,14 +69,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['editPostClicked'])) {
             header("Location: index.php");
             exit();
         } else {
-            echo(mysqli_error($databaseConnection));
+            echo (mysqli_error($databaseConnection));
             mysqli_close($databaseConnection);
             exit();
         }
     }
 }
 
-    if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['postButton'])) {
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['postButton'])) {
     $postContent = mysqli_real_escape_string($databaseConnection, $_POST["postContent"]);
 
     if (!isset($postContent) || trim($postContent) === "") {
@@ -83,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['editPostClicked'])) {
         $postInsertionSuccessful = mysqli_query($databaseConnection, $sql);
 
         if (!$postInsertionSuccessful) {
-            echo(mysqli_error($databaseConnection));
+            echo (mysqli_error($databaseConnection));
             mysqli_close($databaseConnection);
             exit();
         }
@@ -101,14 +106,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['editPostClicked'])) {
     <link href="css/largesocial.css" rel="stylesheet">
 </head>
 <body>
+<div class="container">
+
+    <div class="sidenav">
+        <div class="trends">
+            <h2>Popular Trends</h2>
+            <div class="trend-item">
+                <a href="#">#Sports</a>
+            </div>
+            <div class="trend-item">
+                <a href="#">#Travel</a>
+            </div>
+            <div class="trend-item">
+                <a href="#">#Food</a>
+            </div>
+            <div class="trend-item">
+                <a href="#">#Music</a>
+            </div>
+        </div>
+    </div>
     <h1>Welcome to Large Social</h1>
 
+    <div class="info">
+        This website is designed for older users. Enjoy the larger font size!
+    </div>
+
+
     <span class="error">
-    <?php 
-        foreach($errors as $currentError) {
-            echo($currentError);
+        <?php
+        foreach ($errors as $currentError) {
+            echo ($currentError);
         }
-    ?>
+        ?>
     </span>
 
     <form action="index.php" method="post">
@@ -121,21 +150,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['editPostClicked'])) {
     $allPosts = mysqli_query($databaseConnection, $sql);
 
     while ($currentPost = mysqli_fetch_assoc($allPosts)) {
-    ?>
+        ?>
         <article>
-            <?php echo($currentPost['date']); ?>:
-            <?php echo(htmlspecialchars($currentPost['postContent'])); ?>: by
+            <?php echo ($currentPost['date']); ?>:
+            <?php echo (htmlspecialchars($currentPost['postContent'])); ?>: by
             <?php
             $sql = "SELECT * FROM users WHERE id ='" . $currentPost['userId'] . "'";
             $userOfPost = mysqli_query($databaseConnection, $sql);
             $userOfPost = mysqli_fetch_assoc($userOfPost);
             ?>
-            <?php echo($userOfPost['nickname']); ?>:
+            <?php echo ($userOfPost['nickname']); ?>:
             <?php
             if ($userOfPost['id'] == $userId) {
                 ?>
-                <a href="<?php echo("index.php?postDeleteId=" . urlencode($currentPost['id'])); ?>">Delete</a>
-                <a href="<?php echo("index.php?postEditId=" . urlencode($currentPost['id'])); ?>">Edit</a>
+                <a href="<?php echo ("index.php?postDeleteId=" . urlencode($currentPost['id'])); ?>">Delete</a>
+                <a href="<?php echo ("index.php?postEditId=" . urlencode($currentPost['id'])); ?>">Edit</a>
                 <?php
             }
             ?>
@@ -147,12 +176,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['editPostClicked'])) {
             $sql = "SELECT * FROM posts WHERE id='" . $postEditId . "'";
             $postToEdit = mysqli_query($databaseConnection, $sql);
             $postToEdit = mysqli_fetch_assoc($postToEdit);
-        ?>
-            <form action="<?php echo("index.php?postToEdit=" . urlencode($postToEdit['id'])); ?>" method="POST">
-                <textarea name="updatedPost"><?php echo($postToEdit['postContent']); ?></textarea>
+            ?>
+            <form action="<?php echo ("index.php?postToEdit=" . urlencode($postToEdit['id'])); ?>" method="POST">
+                <textarea name="updatedPost"><?php echo ($postToEdit['postContent']); ?></textarea>
                 <input type="submit" value="Edit post" name="editPostClicked">
             </form>
-        <?php
+            <?php
         }
     }
     ?>
@@ -160,5 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['editPostClicked'])) {
     <?php
     mysqli_close($databaseConnection);
     ?>
+    </div>
+
 </body>
 </html>
